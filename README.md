@@ -1,5 +1,8 @@
 # OSU CSE 2231 – Java Components Workspace
 
+📘 **OSU CSE Components API (official reference)**  
+https://cse22x1.engineering.osu.edu/common/doc/
+
 This repository contains my full workspace for **CSE 2231 (Software I: Software Components)** at **The Ohio State University**.  
 All projects are implemented using the OSU **Java Components** framework, covering fundamental data structures, recursion, testing, and design-by-contract principles.
 
