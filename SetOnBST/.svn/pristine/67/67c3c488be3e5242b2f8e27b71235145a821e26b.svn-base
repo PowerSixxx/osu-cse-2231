@@ -1,0 +1,273 @@
+import static org.junit.Assert.assertEquals;
+
+import org.junit.Test;
+
+import components.set.Set;
+
+/**
+ * JUnit test fixture for {@code Set<String>}'s constructor and kernel methods.
+ *
+ * @author Baowen Liu, Lou Chen
+ *
+ */
+public abstract class SetTest {
+
+    /**
+     * Invokes the appropriate {@code Set} constructor for the implementation
+     * under test and returns the result.
+     *
+     * @return the new set
+     * @ensures constructorTest = {}
+     */
+    protected abstract Set<String> constructorTest();
+
+    /**
+     * Invokes the appropriate {@code Set} constructor for the reference
+     * implementation and returns the result.
+     *
+     * @return the new set
+     * @ensures constructorRef = {}
+     */
+    protected abstract Set<String> constructorRef();
+
+    /**
+     * Creates and returns a {@code Set<String>} of the implementation under
+     * test type with the given entries.
+     *
+     * @param args
+     *            the entries for the set
+     * @return the constructed set
+     * @requires [every entry in args is unique]
+     * @ensures createFromArgsTest = [entries in args]
+     */
+    private Set<String> createFromArgsTest(String... args) {
+        Set<String> set = this.constructorTest();
+        for (String s : args) {
+            assert !set.contains(s) : "Violation of: every entry in args is unique";
+            set.add(s);
+        }
+        return set;
+    }
+
+    /**
+     * Creates and returns a {@code Set<String>} of the reference implementation
+     * type with the given entries.
+     *
+     * @param args
+     *            the entries for the set
+     * @return the constructed set
+     * @requires [every entry in args is unique]
+     * @ensures createFromArgsRef = [entries in args]
+     */
+    private Set<String> createFromArgsRef(String... args) {
+        Set<String> set = this.constructorRef();
+        for (String s : args) {
+            assert !set.contains(s) : "Violation of: every entry in args is unique";
+            set.add(s);
+        }
+        return set;
+    }
+
+    // TODO - add test cases for constructor, add, remove, removeAny, contains, and size
+
+    /**
+     * Test cases for constructors.
+     */
+    @Test
+    public final void testConstructor() {
+        // Set up variables
+        Set<String> s = this.constructorTest();
+        Set<String> sExpected = this.constructorRef();
+        assertEquals(sExpected, s);
+    }
+
+    /**
+     * Test for add to empty.
+     */
+    @Test
+    public final void testAddToEmpty() {
+        /*
+         * Set up variables
+         */
+        Set<String> s = this.createFromArgsTest();
+        Set<String> sExpected = this.createFromArgsRef("Mango");
+        s.add("Mango");
+        assertEquals(sExpected, s);
+    }
+
+    /**
+     * Test for add to non empty.
+     */
+    @Test
+    public final void testAddNonEmpty() {
+        Set<String> s = this.createFromArgsTest("Apple", "Banana");
+        Set<String> sExpected = this.createFromArgsRef("Apple", "Banana", "Cherry");
+        s.add("Cherry");
+        assertEquals(sExpected, s);
+    }
+
+    /**
+     * Test for add to non empty with multiple elements.
+     */
+    @Test
+    public final void testAddNonEmptyMulti() {
+        Set<String> s = this.createFromArgsTest("Apple", "Cherry");
+        Set<String> sExpected = this.createFromArgsRef("Apple", "Banana", "Cherry",
+                "Mango");
+        s.add("Banana");
+        s.add("Mango");
+        assertEquals(sExpected, s);
+    }
+
+    /**
+     * Test for remove to empty.
+     */
+    @Test
+    public final void testRemoveToEmpty() {
+        Set<String> s = this.createFromArgsTest("Apple");
+        Set<String> sExpected = this.createFromArgsRef();
+        String rExpected = "Apple";
+        String r = s.remove("Apple");
+        assertEquals(sExpected, s);
+        assertEquals(rExpected, r);
+    }
+
+    /**
+     * Test for remove to non empty.
+     */
+    @Test
+    public final void testRemoveToNonEmpty() {
+        Set<String> s = this.createFromArgsTest("Apple", "Banana", "Cherry", "Mango");
+        Set<String> sExpected = this.createFromArgsRef("Apple", "Banana", "Mango");
+        String rExpected = "Cherry";
+        String r = s.remove("Cherry");
+        assertEquals(sExpected, s);
+        assertEquals(rExpected, r);
+    }
+
+    /**
+     * Test for remove to non empty from larger set.
+     */
+    @Test
+    public final void testRemoveToNonEmptyLarger() {
+        Set<String> s = this.createFromArgsTest("Apple", "Banana", "Cherry", "Mango",
+                "Orange", "Watermellon");
+        Set<String> sExpected = this.createFromArgsRef("Apple", "Banana", "Cherry",
+                "Mango", "Watermellon");
+        String rExpected = "Orange";
+        String r = s.remove("Orange");
+        assertEquals(sExpected, s);
+        assertEquals(rExpected, r);
+    }
+
+    /**
+     * Test for RemoveAny to empty.
+     */
+    @Test
+    public final void testRemoveAnyToEmpty() {
+        Set<String> s = this.createFromArgsTest("Apple");
+        Set<String> sExpected = this.createFromArgsRef();
+        String rExpected = "Apple";
+        String r = s.removeAny();
+        assertEquals(sExpected, s);
+        assertEquals(rExpected, r);
+    }
+
+    /**
+     * Test for RemoveAny to non empty.
+     */
+    @Test
+    public final void testRemoveAnyToNonEmpty() {
+        Set<String> s = this.createFromArgsTest("Apple", "Banana", "Cherry", "Mango");
+        Set<String> sExpected = this.createFromArgsRef("Banana", "Cherry", "Mango");
+        String r = s.removeAny();
+        String rExpected = "Apple";
+        assertEquals(sExpected, s);
+        assertEquals(rExpected, r);
+    }
+
+    /**
+     * Test for RemoveAny to non empty from larger set.
+     */
+    @Test
+    public final void testRemoveAnyToNonEmptyLarger() {
+        Set<String> s = this.createFromArgsTest("Appleeeee", "Banana", "Cherry", "Mango",
+                "Orange", "Watermellon");
+        Set<String> sExpected = this.createFromArgsRef("Banana", "Cherry", "Mango",
+                "Orange", "Watermellon");
+        String r = s.removeAny();
+        String rExpected = "Appleeeee";
+        assertEquals(sExpected, s);
+        assertEquals(rExpected, r);
+    }
+
+    /**
+     * Test for contains when set is empty.
+     */
+    @Test
+    public final void testContainsEmptySet() {
+        Set<String> s = this.createFromArgsTest();
+        Set<String> sExpected = this.createFromArgsRef();
+        assertEquals(false, s.contains("Apple"));
+        assertEquals(sExpected, s);
+    }
+
+    /**
+     * Test for contains when it is true.
+     */
+    @Test
+    public final void testContainsTrue() {
+        Set<String> s = this.createFromArgsTest("Apple", "Banana", "Cherry", "Mango");
+        Set<String> sExpected = this.createFromArgsRef("Apple", "Banana", "Cherry",
+                "Mango");
+        assertEquals(true, s.contains("Banana"));
+        assertEquals(sExpected, s);
+    }
+
+    /**
+     * Test for contains when it is false.
+     */
+    @Test
+    public final void testContainsFalse() {
+        Set<String> s = this.createFromArgsTest("Apple", "Banana", "Cherry", "Mango",
+                "Orange", "Watermellon");
+        Set<String> sExpected = this.createFromArgsRef("Apple", "Banana", "Cherry",
+                "Mango", "Orange", "Watermellon");
+        assertEquals(false, s.contains("Strawberry"));
+        assertEquals(sExpected, s);
+    }
+
+    /**
+     * Test for size empty.
+     */
+    @Test
+    public final void testSizeEmpty() {
+        Set<String> s = this.createFromArgsTest();
+        Set<String> sExpected = this.createFromArgsRef();
+        assertEquals(0, s.size());
+        assertEquals(sExpected, s);
+    }
+
+    /**
+     * Test for size one.
+     */
+    @Test
+    public final void testSize1() {
+        Set<String> s = this.createFromArgsTest("Ohio");
+        Set<String> sExpected = this.createFromArgsRef("Ohio");
+        assertEquals(1, s.size());
+        assertEquals(sExpected, s);
+    }
+
+    /**
+     * Test for size four.
+     */
+    @Test
+    public final void testSize2() {
+        Set<String> s = this.createFromArgsTest("The", "Ohio", "State", "University");
+        Set<String> sExpected = this.createFromArgsRef("The", "Ohio", "State",
+                "University");
+        assertEquals(4, s.size());
+        assertEquals(sExpected, s);
+    }
+}

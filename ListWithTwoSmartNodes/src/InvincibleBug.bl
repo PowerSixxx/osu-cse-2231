@@ -1,0 +1,24 @@
+PROGRAM InvincibleBug IS
+
+    INSTRUCTION Explore IS
+        IF next-is-empty THEN
+            move
+        ELSE
+            turnleft
+        END IF
+    END Explore
+
+    INSTRUCTION Battle IS
+        IF next-is-enemy THEN
+            infect
+        ELSE
+            skip
+        END IF
+    END Battle
+
+BEGIN
+    WHILE true DO
+        Battle
+        Explore
+    END WHILE
+END InvincibleBug

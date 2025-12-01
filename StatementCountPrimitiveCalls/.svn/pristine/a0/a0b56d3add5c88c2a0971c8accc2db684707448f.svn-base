@@ -1,0 +1,120 @@
+import components.statement.Statement;
+
+/**
+ * Utility class with method to count the number of calls to primitive
+ * instructions (move, turnleft, turnright, infect, skip) in a given
+ * {@code Statement}.
+ *
+ * @author Put your name here
+ *
+ */
+public final class CountPrimitiveCalls {
+
+    /**
+     * Private constructor so this utility class cannot be instantiated.
+     */
+    private CountPrimitiveCalls() {
+    }
+
+    /**
+     * Reports the number of calls to primitive instructions (move, turnleft,
+     * turnright, infect, skip) in a given {@code Statement}.
+     *
+     * @param s
+     *            the {@code Statement}
+     * @return the number of calls to primitive instructions in {@code s}
+     * @ensures <pre>
+     * countOfPrimitiveCalls =
+     *  [number of calls to primitive instructions in s]
+     * </pre>
+     */
+    public static int countOfPrimitiveCalls(Statement s) {
+        int count = 0;
+        switch (s.kind()) {
+            case BLOCK: {
+                int n = s.lengthOfBlock();
+                for (int i = 0; i < n; i++) {
+                    Statement child = s.removeFromBlock(0);
+                    count += countOfPrimitiveCalls(child);
+                    s.addToBlock(i, child); // restore order
+                }
+                break;
+            }
+            case IF: {
+                Statement body = s.newInstance();
+                Statement.Condition c = s.disassembleIf(body);
+                count += countOfPrimitiveCalls(body);
+                s.assembleIf(c, body); // restore
+                break;
+            }
+            case IF_ELSE: {
+                Statement thenPart = s.newInstance();
+                Statement elsePart = s.newInstance();
+                Statement.Condition c = s.disassembleIfElse(thenPart, elsePart);
+                count += countOfPrimitiveCalls(thenPart);
+                count += countOfPrimitiveCalls(elsePart);
+                s.assembleIfElse(c, thenPart, elsePart); // restore
+                break;
+            }
+            case WHILE: {
+                Statement body = s.newInstance();
+                Statement.Condition c = s.disassembleWhile(body);
+                count += countOfPrimitiveCalls(body);
+                s.assembleWhile(c, body); // restore
+                break;
+            }
+            case CALL: {
+                String name = s.disassembleCall();
+                if (name.equals("move") || name.equals("turnleft")
+                        || name.equals("turnright") || name.equals("infect")
+                        || name.equals("skip")) {
+                    count = 1;
+                }
+                s.assembleCall(name); // restore
+                break;
+            }
+            default: {
+                // Unreachable because s.kind() is an enum covering all cases
+                break;
+            }
+        }
+        return count;
+    }
+
+    /**
+     * Reports the number of calls to a given instruction, {@code instr}, in a
+     * given {@code Statement}.
+     *
+     * @param s
+     *            the {@code Statement}
+     * @param instr
+     *            the instruction name
+     * @return the number of calls to {@code instr} in {@code s}
+     * @ensures countOfInstructionCalls = [number of calls to instr in s]
+     */
+    public static int countOfInstructionCalls(Statement s, String instr) {
+        return 1;
+    }
+
+    /**
+     * Refactors the given {@code Statement} by renaming every occurrence of
+     * instruction {@code oldName} to {@code newName}. Every other statement is
+     * left unmodified.
+     *
+     * @param s
+     *            the {@code Statement}
+     * @param oldName
+     *            the name of the instruction to be renamed
+     * @param newName
+     *            the new name of the renamed instruction
+     * @updates s
+     * @requires [newName is a valid IDENTIFIER]
+     * @ensures <pre>
+     * s = [#s refactored so that every occurrence of oldName is
+     *   replaced by newName]
+     * </pre>
+     */
+    public static void renameInstruction(Statement s, String oldName, String newName) {
+
+    }
+}

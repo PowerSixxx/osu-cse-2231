@@ -1,0 +1,313 @@
+import static org.junit.Assert.assertEquals;
+
+import org.junit.Test;
+
+import components.map.Map;
+
+/**
+ * JUnit test fixture for {@code Map<String, String>}'s constructor and kernel
+ * methods.
+ *
+ * @author Baowen Liu, Chen Lou
+ *
+ */
+public abstract class MapTest {
+
+    /**
+     * Invokes the appropriate {@code Map} constructor for the implementation
+     * under test and returns the result.
+     *
+     * @return the new map
+     * @ensures constructorTest = {}
+     */
+    protected abstract Map<String, String> constructorTest();
+
+    /**
+     * Invokes the appropriate {@code Map} constructor for the reference
+     * implementation and returns the result.
+     *
+     * @return the new map
+     * @ensures constructorRef = {}
+     */
+    protected abstract Map<String, String> constructorRef();
+
+    /**
+     *
+     * Creates and returns a {@code Map<String, String>} of the implementation
+     * under test type with the given entries.
+     *
+     * @param args
+     *            the (key, value) pairs for the map
+     * @return the constructed map
+     * @requires <pre>
+     * [args.length is even]  and
+     * [the 'key' entries in args are unique]
+     * </pre>
+     * @ensures createFromArgsTest = [pairs in args]
+     */
+    private Map<String, String> createFromArgsTest(String... args) {
+        assert args.length % 2 == 0 : "Violation of: args.length is even";
+        Map<String, String> map = this.constructorTest();
+        for (int i = 0; i < args.length; i += 2) {
+            assert !map.hasKey(args[i])
+                    : "" + "Violation of: the 'key' entries in args are unique";
+            map.add(args[i], args[i + 1]);
+        }
+        return map;
+    }
+
+    /**
+     *
+     * Creates and returns a {@code Map<String, String>} of the reference
+     * implementation type with the given entries.
+     *
+     * @param args
+     *            the (key, value) pairs for the map
+     * @return the constructed map
+     * @requires <pre>
+     * [args.length is even]  and
+     * [the 'key' entries in args are unique]
+     * </pre>
+     * @ensures createFromArgsRef = [pairs in args]
+     */
+    private Map<String, String> createFromArgsRef(String... args) {
+        assert args.length % 2 == 0 : "Violation of: args.length is even";
+        Map<String, String> map = this.constructorRef();
+        for (int i = 0; i < args.length; i += 2) {
+            assert !map.hasKey(args[i])
+                    : "" + "Violation of: the 'key' entries in args are unique";
+            map.add(args[i], args[i + 1]);
+        }
+        return map;
+    }
+
+    /**
+     * Testing Map constructor.
+     */
+    @Test
+    public final void testConstructor() {
+        Map<String, String> m = this.constructorTest();
+        Map<String, String> mExpected = this.constructorRef();
+        assertEquals(m, mExpected);
+    }
+
+    /**
+     * Testing Map.add() with empty at first.
+     */
+    @Test
+    public final void testAddEmpty() {
+        Map<String, String> m = this.constructorTest();
+        Map<String, String> mExpected = this.createFromArgsRef("aKey", "aValue");
+        // Add the pair
+        m.add("aKey", "aValue");
+        assertEquals(m, mExpected);
+    }
+
+    /**
+     * Testing Map.add() with non-empty element.
+     */
+    @Test
+    public final void testAddNonEmpty() {
+        Map<String, String> m = this.createFromArgsTest("aKey", "aValue");
+        Map<String, String> mExpected = this.createFromArgsRef("aKey", "aValue", "bKey",
+                "bValue");
+        // Add the pair
+        m.add("bKey", "bValue");
+        assertEquals(m, mExpected);
+    }
+
+    /**
+     * Testing Map.add() with add multiple times.
+     */
+    @Test
+    public final void testAddMultiple() {
+        Map<String, String> m = this.createFromArgsTest("aKey", "aValue");
+        Map<String, String> mExpected = this.createFromArgsRef("aKey", "aValue", "bKey",
+                "bValue", "cKey", "cValue");
+        // Add twice
+        m.add("bKey", "bValue");
+        m.add("cKey", "cValue");
+        assertEquals(m, mExpected);
+    }
+
+    /**
+     * test remove with only one in the map.
+     */
+    @Test
+    public final void testRemoveSingle() {
+        Map<String, String> map = this.createFromArgsTest("a", "1");
+        Map<String, String> mapAnswer = this.createFromArgsRef();
+        // remove the pair.
+        map.remove("a");
+        assertEquals(mapAnswer, map);
+    }
+
+    /**
+     * test remove with more then one value stored in the map.
+     */
+    @Test
+    public final void testRemoveMany() {
+        Map<String, String> map = this.createFromArgsTest("a", "1", "b", "2", "c", "3",
+                "d", "4");
+        Map<String, String> mapAnswer = this.createFromArgsRef("a", "1", "b", "2", "d",
+                "4");
+        // remove the selected pair.
+        map.remove("c");
+        assertEquals(mapAnswer, map);
+    }
+
+    /**
+     * test remove 2 item with more then one value stored in the map.
+     */
+    @Test
+    public final void testRemoveMorethanone() {
+        Map<String, String> map = this.createFromArgsTest("a", "1", "b", "2", "c", "3",
+                "d", "4");
+        Map<String, String> mapAnswer = this.createFromArgsRef("a", "1", "d", "4");
+        // remove the selected pair.
+        map.remove("c");
+        map.remove("b");
+        assertEquals(mapAnswer, map);
+    }
+
+    /**
+     * use remove any to remove from a single map.
+     */
+    @Test
+    public final void testRemoveAnySingle() {
+        Map<String, String> map = this.createFromArgsTest("a", "1");
+        Map<String, String> mapAnswer = this.createFromArgsRef("a", "1");
+
+        // removeAny on both maps; compare removed pair if they are same.
+        Map.Pair<String, String> p1 = map.removeAny();
+        Map.Pair<String, String> p2 = mapAnswer.removeAny();
+
+        assertEquals(p2.key(), p1.key());
+        assertEquals(p2.value(), p1.value());
+        assertEquals(mapAnswer, map);
+    }
+
+    /**
+     * use remove any to remove from a map with many item.
+     */
+    @Test
+    public final void testRemoveAnyMany() {
+        Map<String, String> map = this.createFromArgsTest("a", "1", "b", "2", "c", "3",
+                "d", "4");
+        Map<String, String> mapAnswer = this.createFromArgsRef("a", "1", "b", "2", "c",
+                "3", "d", "4");
+
+        // removeAny on both maps; compare removed pair if they are same.
+        Map.Pair<String, String> p1 = map.removeAny();
+        Map.Pair<String, String> p2 = mapAnswer.removeAny();
+
+        assertEquals(p2.key(), p1.key());
+        assertEquals(p2.value(), p1.value());
+        assertEquals(mapAnswer, map);
+    }
+
+    /**
+     * use remove any to remove multiple times from a map with many item.
+     */
+    @Test
+    public final void testRemoveAnyManyMultiple() {
+        Map<String, String> map = this.createFromArgsTest("a", "1", "b", "2", "c", "3",
+                "d", "4");
+        Map<String, String> mapAnswer = this.createFromArgsRef("a", "1", "b", "2", "c",
+                "3", "d", "4");
+
+        // removeAny on both maps; compare removed pair if they are same.
+        Map.Pair<String, String> p1 = map.removeAny();
+        Map.Pair<String, String> p2 = map.removeAny();
+        Map.Pair<String, String> p1A = mapAnswer.removeAny();
+        Map.Pair<String, String> p2A = mapAnswer.removeAny();
+        assertEquals(p1A.key(), p1.key());
+        assertEquals(p2A.key(), p2.key());
+        assertEquals(p1A.value(), p1.value());
+        assertEquals(p2A.value(), p2.value());
+        assertEquals(mapAnswer, map);
+    }
+
+    /**
+     * test size with empty map.
+     */
+    @Test
+    public final void testSizeEmpty() {
+        Map<String, String> map = this.constructorTest();
+        // create a empty map.
+        assertEquals(0, map.size());
+    }
+
+    /**
+     * test size with normal map.
+     */
+    @Test
+    public final void testSizeNonEmpty() {
+        Map<String, String> map = this.createFromArgsTest("a", "1", "b", "2", "c", "3");
+        // create a map size of 3.
+        assertEquals(3, map.size());
+    }
+
+    /**
+     * test size with normal map after calling other method.
+     */
+    @Test
+    public final void testSizeAfterAddAndRemove() {
+        Map<String, String> m = this.createFromArgsTest("a", "1", "b", "2");
+        m.add("c", "3"); // size 3
+        m.remove("b"); // size 2
+        m.removeAny(); // size 1
+        assertEquals(1, m.size());
+    }
+
+    /**
+     * test with haskey return true.
+     */
+    @Test
+    public final void testHasKeyTrue() {
+        Map<String, String> map = this.createFromArgsTest("a", "1");
+        assertEquals(true, map.hasKey("a"));
+    }
+
+    /**
+     * test with haskey return false.
+     */
+    @Test
+    public final void testHasKeyFalse() {
+        Map<String, String> map = this.createFromArgsTest("a", "1");
+        assertEquals(false, map.hasKey("fake"));
+    }
+
+    /**
+     * Testing Map.value() with only one element.
+     */
+    @Test
+    public final void testValueOneKey() {
+        Map<String, String> m = this.createFromArgsTest("aKey", "aValue");
+        Map<String, String> mExpected = this.createFromArgsRef("aKey", "aValue");
+        // Find the value associated with aKey
+        String v = m.value("aKey");
+        String vExpected = "aValue";
+
+        assertEquals(m, mExpected);
+        assertEquals(v, vExpected);
+    }
+
+    /**
+     * Testing Map.value() with the multiple elements.
+     */
+    @Test
+    public final void testValueMultipleKeys() {
+        Map<String, String> m = this.createFromArgsTest("aKey", "aValue", "bKey",
+                "bValue", "cKey", "cValue");
+        Map<String, String> mExpected = this.createFromArgsRef("aKey", "aValue", "bKey",
+                "bValue", "cKey", "cValue");
+        // Find the value associated with bKey
+        String v = m.value("bKey");
+        String vExpected = "bValue";
+
+        assertEquals(m, mExpected);
+        assertEquals(v, vExpected);
+    }
+
+}

@@ -1,0 +1,16 @@
+# Eclipse metadata
+.metadata/
+.settings/
+*.classpath
+*.project
+
+# Build output
+bin/
+target/
+*.class
+
+# macOS
+.DS_Store
+
+# Other
+*.log
